@@ -23,7 +23,11 @@ class BudgetManager:
 
         budgets = connection.execute(
             """
-            SELECT id, category, amount, month
+            SELECT
+                id,
+                category,
+                amount,
+                month
             FROM budgets
             WHERE user_id = ?
             ORDER BY month DESC
@@ -48,3 +52,20 @@ class BudgetManager:
 
         connection.commit()
         connection.close()
+
+    def get_total_budget(self, user_id):
+        connection = get_connection()
+
+        result = connection.execute(
+            """
+            SELECT COALESCE(SUM(amount), 0)
+            FROM budgets
+            WHERE user_id = ?
+            """,
+            (user_id,)
+        ).fetchone()
+
+        connection.close()
+
+        return result[0]
+    

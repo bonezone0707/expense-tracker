@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask, render_template, request, redirect, url_for
 
 from database import initialize_database
@@ -6,9 +7,9 @@ from expense_manager import ExpenseManager
 from budget_manager import BudgetManager
 
 
-# --------------------------------------------------
-# Application Configuration
-# --------------------------------------------------
+# ==========================================================
+# APPLICATION CONFIGURATION
+# ==========================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
@@ -21,44 +22,52 @@ app = Flask(
 app.config["SECRET_KEY"] = "change-this-secret-key"
 
 
-# --------------------------------------------------
-# Initialize Database
-# --------------------------------------------------
+# ==========================================================
+# DATABASE INITIALIZATION
+# ==========================================================
 
 initialize_database()
 
 
-# --------------------------------------------------
-# Create Manager Objects
-# --------------------------------------------------
+# ==========================================================
+# MANAGER OBJECTS
+# ==========================================================
 
 expense_manager = ExpenseManager()
 budget_manager = BudgetManager()
 
 
-# --------------------------------------------------
-# Home Page
-# --------------------------------------------------
+# ==========================================================
+# HOME PAGE
+# ==========================================================
 
 @app.route("/")
 def home():
+
     return """
     <!DOCTYPE html>
     <html lang="en">
 
     <head>
+
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        >
 
         <title>Expense Tracker</title>
 
         <style>
+
             body {
                 font-family: Arial, sans-serif;
                 max-width: 900px;
                 margin: 60px auto;
                 padding: 20px;
                 text-align: center;
+                background-color: #f5f5f5;
             }
 
             h1 {
@@ -69,7 +78,7 @@ def home():
                 margin-bottom: 30px;
             }
 
-            a {
+            .button {
                 display: inline-block;
                 padding: 12px 20px;
                 margin: 10px;
@@ -79,9 +88,10 @@ def home():
                 border-radius: 5px;
             }
 
-            a:hover {
+            .button:hover {
                 background-color: #555;
             }
+
         </style>
 
     </head>
@@ -91,15 +101,29 @@ def home():
         <h1>Expense Tracker</h1>
 
         <p>
-            Manage your expenses and monthly budgets in one place.
+            Manage your expenses, budgets, and financial information
+            in one place.
         </p>
 
-        <a href="/expenses">
+        <a
+            class="button"
+            href="/expenses"
+        >
             Manage Expenses
         </a>
 
-        <a href="/budgets">
+        <a
+            class="button"
+            href="/budgets"
+        >
             Manage Budgets
+        </a>
+
+        <a
+            class="button"
+            href="/dashboard"
+        >
+            Financial Dashboard
         </a>
 
     </body>
@@ -108,15 +132,15 @@ def home():
     """
 
 
-# --------------------------------------------------
-# Expense Management
-# --------------------------------------------------
+# ==========================================================
+# EXPENSE MANAGEMENT
+# ==========================================================
 
 @app.route("/expenses")
 def expenses():
 
     # Temporary demo user.
-    # Authentication will be added later.
+    # Authentication can be added later.
     user_id = 1
 
     expenses_list = expense_manager.get_expenses(user_id)
@@ -127,14 +151,23 @@ def expenses():
     )
 
 
+# ----------------------------------------------------------
+# ADD EXPENSE
+# ----------------------------------------------------------
+
 @app.route("/expenses/add", methods=["POST"])
 def add_expense():
 
     user_id = 1
 
     description = request.form["description"]
-    amount = float(request.form["amount"])
+
+    amount = float(
+        request.form["amount"]
+    )
+
     category = request.form["category"]
+
     expense_date = request.form["expense_date"]
 
     expense_manager.add_expense(
@@ -145,8 +178,14 @@ def add_expense():
         expense_date
     )
 
-    return redirect(url_for("expenses"))
+    return redirect(
+        url_for("expenses")
+    )
 
+
+# ----------------------------------------------------------
+# DELETE EXPENSE
+# ----------------------------------------------------------
 
 @app.route(
     "/expenses/delete/<int:expense_id>",
@@ -161,21 +200,25 @@ def delete_expense(expense_id):
         user_id
     )
 
-    return redirect(url_for("expenses"))
+    return redirect(
+        url_for("expenses")
+    )
 
 
-# --------------------------------------------------
-# Budget Management
-# --------------------------------------------------
+# ==========================================================
+# BUDGET MANAGEMENT
+# ==========================================================
 
 @app.route("/budgets")
 def budgets():
 
     # Temporary demo user.
-    # Authentication will be added later.
+    # Authentication can be added later.
     user_id = 1
 
-    budgets_list = budget_manager.get_budgets(user_id)
+    budgets_list = budget_manager.get_budgets(
+        user_id
+    )
 
     return render_template(
         "budgets.html",
@@ -183,13 +226,21 @@ def budgets():
     )
 
 
+# ----------------------------------------------------------
+# ADD BUDGET
+# ----------------------------------------------------------
+
 @app.route("/budgets/add", methods=["POST"])
 def add_budget():
 
     user_id = 1
 
     category = request.form["category"]
-    amount = float(request.form["amount"])
+
+    amount = float(
+        request.form["amount"]
+    )
+
     month = request.form["month"]
 
     budget_manager.add_budget(
@@ -199,8 +250,14 @@ def add_budget():
         month
     )
 
-    return redirect(url_for("budgets"))
+    return redirect(
+        url_for("budgets")
+    )
 
+
+# ----------------------------------------------------------
+# DELETE BUDGET
+# ----------------------------------------------------------
 
 @app.route(
     "/budgets/delete/<int:budget_id>",
@@ -215,12 +272,85 @@ def delete_budget(budget_id):
         user_id
     )
 
-    return redirect(url_for("budgets"))
+    return redirect(
+        url_for("budgets")
+    )
 
 
-# --------------------------------------------------
-# Run Application
-# --------------------------------------------------
+# ==========================================================
+# FINANCIAL DASHBOARD
+# ==========================================================
+
+@app.route("/dashboard")
+def dashboard():
+
+    user_id = 1
+
+    # Get total amount spent
+    total_expenses = (
+        expense_manager.get_total_expenses(
+            user_id
+        )
+    )
+
+    # Get total amount budgeted
+    total_budget = (
+        budget_manager.get_total_budget(
+            user_id
+        )
+    )
+
+    # Calculate remaining budget
+    remaining_budget = (
+        total_budget - total_expenses
+    )
+
+    # Get number of expenses
+    expense_count = (
+        expense_manager.get_expense_count(
+            user_id
+        )
+    )
+
+    # Get spending totals by category
+    category_totals = (
+        expense_manager.get_expenses_by_category(
+            user_id
+        )
+    )
+
+    # Get the five most recent expenses
+    recent_expenses = (
+        expense_manager.get_recent_expenses(
+            user_id,
+            limit=5
+        )
+    )
+
+    return render_template(
+        "dashboard.html",
+
+        total_expenses=total_expenses,
+
+        total_budget=total_budget,
+
+        remaining_budget=remaining_budget,
+
+        expense_count=expense_count,
+
+        category_totals=category_totals,
+
+        recent_expenses=recent_expenses
+    )
+
+
+# ==========================================================
+# RUN APPLICATION
+# ==========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )
+

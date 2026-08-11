@@ -26,7 +26,7 @@ How to Run
 
 First, install the required Python packages:
 
-pip install -r requirements.txt
+pip install -r Flask==3.1.1
 
 Then start the Flask application:
 

@@ -18,8 +18,8 @@ The rest will be implemented as the project progresses:  user accounts, expendit
 Project Structure
 expense-tracker/
 │
-├── app.py
-├── requirements.txt
+├── application.py
+├── dependencies.txt
 ├── .gitignore
 └── README.md
 How to Run
@@ -30,7 +30,7 @@ pip install -r Flask==3.1.1
 
 Then start the Flask application:
 
-python app.py
+python application.py
 
 Open a web browser and go to:
 

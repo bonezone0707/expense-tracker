@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Budget Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 30px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .navigation {
+            margin-bottom: 25px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Budget Management</h1>
+
+    <div class="navigation">
+        <a href="/">Home</a> |
+        <a href="/expenses">Expenses</a>
+    </div>
+
+    <h2>Create Budget</h2>
+
+    <form method="POST" action="/budgets/add">
+
+        <select name="category" required>
+
+            <option value="">
+                Select Category
+            </option>
+
+            <option value="Food">
+                Food
+            </option>
+
+            <option value="Transportation">
+                Transportation
+            </option>
+
+            <option value="Entertainment">
+                Entertainment
+            </option>
+
+            <option value="Bills">
+                Bills
+            </option>
+
+            <option value="Shopping">
+                Shopping
+            </option>
+
+            <option value="Other">
+                Other
+            </option>
+
+        </select>
+
+        <input
+            type="number"
+            name="amount"
+            placeholder="Budget Amount"
+            step="0.01"
+            min="0"
+            required
+        >
+
+        <input
+            type="month"
+            name="month"
+            required
+        >
+
+        <button type="submit">
+            Create Budget
+        </button>
+
+    </form>
+
+    <h2>Your Budgets</h2>
+
+    {% if budgets %}
+
+    <table>
+
+        <tr>
+            <th>Category</th>
+            <th>Budget Amount</th>
+            <th>Month</th>
+            <th>Action</th>
+        </tr>
+
+        {% for budget in budgets %}
+
+        <tr>
+
+            <td>
+                {{ budget["category"] }}
+            </td>
+
+            <td>
+                ${{ "%.2f"|format(budget["amount"]) }}
+            </td>
+
+            <td>
+                {{ budget["month"] }}
+            </td>
+
+            <td>
+
+                <form
+                    method="POST"
+                    action="/budgets/delete/{{ budget['id'] }}"
+                >
+
+                    <button type="submit">
+                        Delete
+                    </button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    {% else %}
+
+    <p>
+        No budgets have been created yet.
+    </p>
+
+    {% endif %}
+
+</body>
+
+</html>
